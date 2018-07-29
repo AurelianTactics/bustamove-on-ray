@@ -8,7 +8,9 @@ import gym
 import gym.spaces as spaces
 import retro
 import numpy as np
-
+import time
+import os
+import csv
 
 class LazyFrames(object):
     def __init__(self, frames):
@@ -123,15 +125,139 @@ class RewardScaler(gym.RewardWrapper):
     and effects performance a lot.
     """
     def reward(self, reward):
-        return reward * 0.001
+        return reward * 0.01
+
+class StochasticFrameSkip(gym.Wrapper):
+    def __init__(self, env, n, stickprob):
+        gym.Wrapper.__init__(self, env)
+        self.n = n
+        self.stickprob = stickprob
+        self.curac = None
+        self.rng = np.random.RandomState()
+
+    def reset(self, **kwargs):
+        self.curac = None
+        return self.env.reset(**kwargs)
+
+    def step(self, ac):
+        done = False
+        totrew = 0
+        for i in range(self.n):
+            # First step after reset, use action
+            if self.curac is None:
+                self.curac = ac
+            # First substep, delay with probability=stickprob
+            elif i == 0:
+                if self.rng.rand() > self.stickprob:
+                    self.curac = ac
+            # Second substep, new action definitely kicks in
+            elif i == 1:
+                self.curac = ac
+            ob, rew, done, info = self.env.step(self.curac)
+            totrew += rew
+            if done:
+                break
+        return ob, totrew, done, info
 
 
-def make(game, state, stack=True, scale_rew=True):
+class StochasticFrameSkip(gym.Wrapper):
+    def __init__(self, env, n, stickprob):
+        gym.Wrapper.__init__(self, env)
+        self.n = n
+        self.stickprob = stickprob
+        self.curac = None
+        self.rng = np.random.RandomState()
+
+    def reset(self, **kwargs):
+        self.curac = None
+        return self.env.reset(**kwargs)
+
+    def step(self, ac):
+        done = False
+        totrew = 0
+        for i in range(self.n):
+            # First step after reset, use action
+            if self.curac is None:
+                self.curac = ac
+            # First substep, delay with probability=stickprob
+            elif i == 0:
+                if self.rng.rand() > self.stickprob:
+                    self.curac = ac
+            # Second substep, new action definitely kicks in
+            elif i == 1:
+                self.curac = ac
+            ob, rew, done, info = self.env.step(self.curac)
+            totrew += rew
+            if done:
+                break
+        return ob, totrew, done, info
+
+
+class Monitor(gym.Wrapper):
+    def __init__(self, env, monitorfile, logfile=None):
+        gym.Wrapper.__init__(self, env)
+        self.file = open(monitorfile, 'w')
+        self.csv = csv.DictWriter(self.file, ['r', 'l', 't'])
+        #if logfile is not None:
+        self.log = open(logfile, 'w')
+        self.logcsv = csv.DictWriter(self.log, ['l', 't'])
+        self.episode_reward = 0
+        self.episode_length = 0
+        self.total_length = 0
+        self.start = None
+        self.csv.writeheader()
+        self.file.flush()
+        #if logfile is not None:
+        self.logcsv.writeheader()
+        self.log.flush()
+        self.logfile = logfile
+
+    def reset(self, **kwargs):
+        if not self.start:
+            self.start = time.time()
+        else:
+            self.csv.writerow({
+                'r': self.episode_reward,
+                'l': self.episode_length,
+                't': time.time() - self.start
+            })
+            self.file.flush()
+        self.episode_length = 0
+        self.episode_reward = 0
+        return self.env.reset(**kwargs)
+
+    def step(self, ac):
+        ob, rew, done, info = self.env.step(ac)
+        self.episode_length += 1
+        self.total_length += 1
+        self.episode_reward += rew
+        #if self.logfile is not None:
+        if self.total_length % 1000 == 0:
+            self.logcsv.writerow({
+                'l': self.total_length,
+                't': time.time() - self.start
+            })
+            self.log.flush()
+        return ob, rew, done, info
+
+    def __del__(self):
+        self.file.close()
+
+
+def make(game, state, stack=True, scale_rew=True, monitordir='logs/', bk2dir='videos/'):
     """
     Create an environment with some standard wrappers.
     """
     env = retro.make(game, state)
-    #env.auto_record('videos/')
+    if bk2dir:
+        env.auto_record('videos/')
+    if monitordir:
+        #env = Monitor(env, os.path.join(monitordir, 'monitor.csv'), os.path.join(monitordir, 'log.csv'))
+        time_int = int(time.time())
+        env = Monitor(env, os.path.join('monitor_{}.csv'.format(time_int)), os.path.join('log_{}.csv'.format(time_int)))
+
+    env = StochasticFrameSkip(env, n=6, stickprob=0.0)
+
     env = SonicDiscretizer(env)
     if scale_rew:
         env = RewardScaler(env)

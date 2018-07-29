@@ -39,10 +39,10 @@ def explore(config):
 
 
 pbt = PopulationBasedTraining(
-        time_attr="time_total_s",
+        time_attr="training_iteration",
         reward_attr="episode_reward_mean",
-        perturbation_interval=120,
-        resample_probability=0.25,
+        perturbation_interval=10,
+        resample_probability=0.01,#0.25,
         # Specifies the mutations of these hyperparams
         hyperparam_mutations={
             "lambda": lambda: random.uniform(0.9, 1.0),
@@ -57,37 +57,43 @@ pbt = PopulationBasedTraining(
             "entropy_coeff": lambda: random.uniform(0.0, 0.2),
             "kl_coeff": [0.0,0.2,1.0],
             "kl_target": lambda: random.uniform(0.003, 0.03)
-        },
-custom_explore_fn=explore)
+        }
+    #,custom_explore_fn=explore
+)
 
 ray.init()
 
 run_experiments({
-    'sonic-ppo': {
+    'bustamove-ppo-pbt': {
         'run': 'PPO',
         'env': 'sonic_env',
+        'stop':{'timesteps_total': 4000000},
+        #'stop':{'training_iteration': 100},
+        'repeat':5,
         # 'trial_resources': {
         #     'gpu': 2,  # note, keep this in sync with 'devices' config value
         #     'cpu': lambda spec: spec.config.num_workers,  # one cpu per worker
         # },
         "trial_resources": {
                             'cpu': lambda spec: spec.config.num_workers,
-                            "gpu": 1
+                            #'extra_cpu': 1,
+                            #'extra_gpu' : ,
+                            'gpu': 1
         },
         'config': {
-            'horizon': 1024, #grid_search([256,512,1024,2048]),
+            'horizon': 1024,#1024, #grid_search([256,512,1024,2048]),
             # grid search over learning rate
             'sgd_stepsize': 1e-4,#grid_search([5e-4, 1e-4, 5e-5, 1e-5]),
-            'timesteps_per_batch': 64,#grid_search([16,32,64,128]),#40000,
+            'timesteps_per_batch': 32,#64,#grid_search([16,32,64,128]),#40000,
             #'min_steps_per_task': 100,
             'num_workers': 2,
             'gamma': 0.99, #grid_search([0.99,0.995,0.999]),
             'lambda': 0.95, #grid_search([0.9, 0.95, 1.0]),
             'clip_param': 0.2,#grid_search([0.1, 0.2, 0.3]),
-            'num_sgd_iter': 3,#grid_search([3, 4, 5, 6]),
+            'num_sgd_iter': 2,#grid_search([3, 4, 5, 6]),
             'vf_loss_coeff':1,#grid_search([0.5,0.75,1]),
             'entropy_coeff':0.0,#grid_search([0.0,0.05,0.1]),
-            'kl_coeff':0.2,#grid_search([0.0,0.2]), #I think 0.0 turns off kl
+            #'kl_coeff':0.2,#grid_search([0.0,0.2]), #I think 0.0 turns off kl
             'kl_target':0.01,#grid_search([0.003,0.01,0.02,0.03]),
             #'sgd_batchsize': 4096,
             'use_gae': True,

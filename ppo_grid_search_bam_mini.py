@@ -29,12 +29,10 @@ register_env(env_name,
 ray.init()
 
 run_experiments({
-    'bustamove-ppo-grid': {
+    'bustamove-ppo': {
         'run': 'PPO',
         'env':'bustamove_env',
-        'stop':{'timesteps_total': 200000},
-        'repeat':10,
-        #'stop':{'training_iteration': 1},
+        'stop':{'training_iteration': 50},
         #'env': grid_search(['bustamove_env','bustamove_env2']),
         # 'trial_resources': {
         #     'gpu': 2,  # note, keep this in sync with 'devices' config value
@@ -42,24 +40,24 @@ run_experiments({
         # },
         "trial_resources": {
                             'cpu': lambda spec: spec.config.num_workers,
-                            #'extra_cpu': 1,
+                            'extra_cpu': 1,
                             "gpu": 1
         },
         'config': {
-            'horizon':lambda spec: random.randint(256,5000),#grid_search([256,1024,2048,4096]),#grid_search([256,512,1024,2048]),
+            'horizon':grid_search([1024,4096]),#grid_search([256,512,1024,2048]),
             # grid search over learning rate
-            'sgd_stepsize': lambda spec: random.uniform(1e-3, 1e-6), #grid_search([1e-3, 1e-4, 1e-5]),#grid_search([5e-4, 1e-4, 5e-5, 1e-5]),
-            'timesteps_per_batch': lambda spec: random.randint(8,257),#grid_search([32,64,128]),#grid_search([16,32,64,128]),#40000,
+            'sgd_stepsize': 2e-4,#grid_search([1e-3, 1e-4, 1e-5]),#grid_search([5e-4, 1e-4, 5e-5, 1e-5]),
+            'timesteps_per_batch': 32,#grid_search([32,64,128]),#grid_search([16,32,64,128]),#40000,
             #'min_steps_per_task': 100,
             'num_workers': 2,
-            'gamma': lambda spec: random.uniform(0.99,0.999),#grid_search([0.99,0.995,0.999]),
-            'lambda': lambda spec: random.uniform(0.9,1.0),#grid_search([0.9, 0.95, 1.0]),
-            'clip_param': lambda spec: random.uniform(0.1, 0.4),#grid_search([0.1, 0.2, 0.3]),
-            'num_sgd_iter': lambda spec: random.randint(2,9),#grid_search([3,5]),#grid_search([3, 4, 5, 6]),
-            'vf_loss_coeff':lambda spec: random.uniform(0.5,1.0),#grid_search([0.5,0.75,1]),
-            'entropy_coeff':lambda spec: random.uniform(0.0, 0.1),#grid_search([0.0,0.05,0.1]),
-            #'kl_coeff':grid_search([0.0,0.2]), #I think 0.0 turns off kl
-            'kl_target':lambda spec: random.uniform(0.003, 0.03),#grid_search([0.01,0.02]),# grid_search([0.003,0.01,0.02,0.03]),
+            'gamma': grid_search([0.99,0.999]),#grid_search([0.99,0.995,0.999]),
+            #'lambda': grid_search([0.9, 1.0]),#grid_search([0.9, 0.95, 1.0]),
+            'clip_param': grid_search([0.1, 0.2, 0.3]),
+            'num_sgd_iter': 3,#grid_search([3,5]),#grid_search([3, 4, 5, 6]),
+            #'vf_loss_coeff':grid_search([0.5,1.0]),#grid_search([0.5,0.75,1]),
+            'entropy_coeff':0.0,#grid_search([0.0,0.1]),#grid_search([0.0,0.05,0.1]),
+            'kl_coeff':0.0,#grid_search([0.0,0.2]), #I think 0.0 turns off kl
+            #'kl_target':grid_search([0.01,0.02]),# grid_search([0.003,0.01,0.02,0.03]),
             #'sgd_batchsize': 4096,#only for gpu
             'use_gae': True,
             #'devices': ['/gpu:0', '/gpu:1'],

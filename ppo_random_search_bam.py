@@ -6,6 +6,7 @@ import ray
 from ray.tune import grid_search, run_experiments
 from ray.tune.registry import register_env
 import sonic_on_ray
+import random
 
 
 env_name = 'bustamove_env'
@@ -29,7 +30,7 @@ register_env(env_name,
 ray.init()
 
 run_experiments({
-    'bustamove-ppo-grid': {
+    'bustamove-ppo-random-search': {
         'run': 'PPO',
         'env':'bustamove_env',
         'stop':{'timesteps_total': 200000},

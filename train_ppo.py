@@ -28,7 +28,7 @@ env_name = 'sonic_env'
 
 register_env(env_name,
              lambda config: sonic_on_ray.make(game='BustAMove-Snes',
-                                              state='BustAMove.1pplay.Level10'))
+                                              state='BustAMove.1pplay.Level1'))
 
 ray.init()
 
@@ -36,19 +36,20 @@ config = ppo.DEFAULT_CONFIG.copy()
 
 config.update({
     #'timesteps_per_batch': 40000,
-    'timesteps_per_batch': 128,
+    'timesteps_per_batch': 8,
     #'min_steps_per_task': 100,
     #'num_workers': 32,
     'num_workers': 1,
     'gamma': 0.99,
     'lambda': 0.95,
     'clip_param': 0.1,
-    'num_sgd_iter': 2,
+    'num_sgd_iter': 3,
     #'sgd_batchsize': 4096,
-    'sgd_batchsize': 128,
-    'sgd_stepsize': 5e-5,
+    #'sgd_batchsize': 128,
+    'sgd_stepsize': 2e-4,
     'use_gae': True,
-    'horizon': 512,
+    'horizon': 4096,
+    'kl_coeff': 0.0,
     # 'devices': ['/gpu:0', '/gpu:1', '/gpu:2', '/gpu:3', '/gpu:4', '/gpu:5',
     #             '/gpu:6', 'gpu:7'],
     #'devices': ['/gpu:0'],
