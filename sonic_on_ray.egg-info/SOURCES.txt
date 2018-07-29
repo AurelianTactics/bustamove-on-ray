@@ -1,0 +1,7 @@
+README.md
+sonic_on_ray/__init__.py
+sonic_on_ray/sonic_on_ray.py
+sonic_on_ray.egg-info/PKG-INFO
+sonic_on_ray.egg-info/SOURCES.txt
+sonic_on_ray.egg-info/dependency_links.txt
+sonic_on_ray.egg-info/top_level.txt

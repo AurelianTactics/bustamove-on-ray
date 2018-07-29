@@ -1,0 +1,10 @@
+Metadata-Version: 1.0
+Name: sonic-on-ray
+Version: 0.0.1
+Summary: Running gym retro on Ray
+Home-page: https://github.com/openai/sonic-on-ray
+Author: Philipp Moritz
+Author-email: pcmoritz@gmail.com
+License: UNKNOWN
+Description: UNKNOWN
+Platform: UNKNOWN
