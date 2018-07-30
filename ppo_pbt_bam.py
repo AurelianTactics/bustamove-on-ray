@@ -69,7 +69,7 @@ run_experiments({
         'env': 'sonic_env',
         'stop':{'timesteps_total': 4000000},
         #'stop':{'training_iteration': 100},
-        'repeat':5,
+        'repeat':20,
         # 'trial_resources': {
         #     'gpu': 2,  # note, keep this in sync with 'devices' config value
         #     'cpu': lambda spec: spec.config.num_workers,  # one cpu per worker
