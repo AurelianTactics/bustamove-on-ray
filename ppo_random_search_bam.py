@@ -33,7 +33,7 @@ run_experiments({
     'bustamove-ppo-random-search': {
         'run': 'PPO',
         'env':'bustamove_env',
-        'stop':{'timesteps_total': 200000},
+        'stop':{'timesteps_total': 500000},
         'repeat':10,
         #'stop':{'training_iteration': 1},
         #'env': grid_search(['bustamove_env','bustamove_env2']),
@@ -47,18 +47,18 @@ run_experiments({
                             "gpu": 1
         },
         'config': {
-            'horizon':lambda spec: random.randint(256,5000),#grid_search([256,1024,2048,4096]),#grid_search([256,512,1024,2048]),
+            'horizon':lambda spec: random.randint(512,8192),#grid_search([256,1024,2048,4096]),#grid_search([256,512,1024,2048]),
             # grid search over learning rate
-            'sgd_stepsize': lambda spec: random.uniform(1e-3, 1e-6), #grid_search([1e-3, 1e-4, 1e-5]),#grid_search([5e-4, 1e-4, 5e-5, 1e-5]),
+            'sgd_stepsize': lambda spec: random.choice([2e-4, 3e-5, 1e-5,3e-6]),#random.uniform(1e-3, 1e-6), #grid_search([1e-3, 1e-4, 1e-5]),#grid_search([5e-4, 1e-4, 5e-5, 1e-5]),
             'timesteps_per_batch': lambda spec: random.randint(8,257),#grid_search([32,64,128]),#grid_search([16,32,64,128]),#40000,
             #'min_steps_per_task': 100,
             'num_workers': 2,
             'gamma': lambda spec: random.uniform(0.99,0.999),#grid_search([0.99,0.995,0.999]),
             'lambda': lambda spec: random.uniform(0.9,1.0),#grid_search([0.9, 0.95, 1.0]),
             'clip_param': lambda spec: random.uniform(0.1, 0.4),#grid_search([0.1, 0.2, 0.3]),
-            'num_sgd_iter': lambda spec: random.randint(2,9),#grid_search([3,5]),#grid_search([3, 4, 5, 6]),
+            'num_sgd_iter': lambda spec: random.randint(3,8),#grid_search([3,5]),#grid_search([3, 4, 5, 6]),
             'vf_loss_coeff':lambda spec: random.uniform(0.5,1.0),#grid_search([0.5,0.75,1]),
-            'entropy_coeff':lambda spec: random.uniform(0.0, 0.1),#grid_search([0.0,0.05,0.1]),
+            'entropy_coeff':lambda spec: random.choice([0.0,0.003,0.01]),#lambda spec: random.uniform(0.0, 0.02),
             #'kl_coeff':grid_search([0.0,0.2]), #I think 0.0 turns off kl
             'kl_target':lambda spec: random.uniform(0.003, 0.03),#grid_search([0.01,0.02]),# grid_search([0.003,0.01,0.02,0.03]),
             #'sgd_batchsize': 4096,#only for gpu

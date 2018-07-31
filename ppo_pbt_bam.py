@@ -41,8 +41,8 @@ def explore(config):
 pbt = PopulationBasedTraining(
         time_attr="training_iteration",
         reward_attr="episode_reward_mean",
-        perturbation_interval=10,
-        resample_probability=0.01,#0.25,
+        perturbation_interval=75,
+        resample_probability=0.25,#0.25,
         # Specifies the mutations of these hyperparams
         hyperparam_mutations={
             "lambda": lambda: random.uniform(0.9, 1.0),
@@ -54,8 +54,8 @@ pbt = PopulationBasedTraining(
             #"sgd_batchsize": lambda: random.randint(128, 16384),
             "timesteps_per_batch": lambda: random.randint(16,256),
             "vf_loss_coeff": lambda: random.uniform(0.3, 1),
-            "entropy_coeff": lambda: random.uniform(0.0, 0.2),
-            "kl_coeff": [0.0,0.2,1.0],
+            "entropy_coeff": lambda: random.uniform(0.0, 0.01),
+            #"kl_coeff": [0.0,0.2,1.0],
             "kl_target": lambda: random.uniform(0.003, 0.03)
         }
     #,custom_explore_fn=explore
