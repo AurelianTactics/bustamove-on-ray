@@ -1,3 +1,5 @@
+Modification of https://github.com/openai/sonic-on-ray
+
 # Sonic on Ray
 
 This file describes how to use Sonic with Ray and RLLib. We include
